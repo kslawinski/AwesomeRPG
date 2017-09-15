@@ -48,7 +48,22 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if(itemClass == nullptr)
+	{
+		return;
+	}
+
+	//GetMesh()->GetSocketWorldLocationAndRotation(FName("ItemSocket"), handSocketLocation, handSocketRotation);
+	item = GetWorld()->SpawnActor<AItem>(itemClass);
+	item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ItemSocket"));//AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),);
+	//item->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld,true)); // USE TO DETACH
+}
+
+void APlayerCharacter::DropWeapon()
+{
+	item->EnableItemPhisics();
+	item->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+
 }
 
 // Called every frame
@@ -70,6 +85,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAction("DropWeapon", IE_Pressed, this, &APlayerCharacter::DropWeapon);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.

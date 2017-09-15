@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "Item.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -36,6 +36,8 @@ protected:
 	*/
 	void LookUpAtRate(float Rate);
 
+	void DropWeapon();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -50,6 +52,14 @@ public:
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	TSubclassOf<AItem> itemClass;
+
+	AItem* item;
+
+	//FVector handSocketLocation;
+	//FRotator handSocketRotation;
 	
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
