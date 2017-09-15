@@ -14,9 +14,12 @@ AItem::AItem()
 	itemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item Mesh Comp"), false);
 	itemMesh->SetupAttachment(RootComponent);
 
-	itemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("StaticMesh'/Game/Mesh/LowPolyKnight/LowPoly_Knight_Sword.LowPoly_Knight_Sword'")); // load a mesh from a file
+	itemMesh->SetStaticMesh(MeshObj.Object);
 
-	//itemMesh->SetSimulatePhysics(true);
+	itemMesh->SetSimulatePhysics(false);
+	itemMesh->SetMassOverrideInKg(TEXT("GripPoint"),2.0f);
+	itemMesh->bGenerateOverlapEvents = true;
 
 }
 
@@ -24,7 +27,7 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -36,7 +39,17 @@ void AItem::Tick(float DeltaTime)
 
 void AItem::EnableItemPhisics()
 {
+
 	itemMesh->SetSimulatePhysics(true);
-	itemMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	itemMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	itemMesh->bGenerateOverlapEvents = true;
+}
+
+void AItem::DisableItemPhisics()
+{
+	itemMesh->SetSimulatePhysics(false);
+	itemMesh->bGenerateOverlapEvents = false;
+	itemMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	itemMesh->ResetRelativeTransform();
 }
 

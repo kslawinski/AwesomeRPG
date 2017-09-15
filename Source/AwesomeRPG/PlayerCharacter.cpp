@@ -2,7 +2,9 @@
 
 #include "AwesomeRPG.h"
 #include "PlayerCharacter.h"
-
+#include "Item.h"
+#include "Sword.h"
+#include "Shield.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -42,6 +44,11 @@ APlayerCharacter::APlayerCharacter()
 
 												   // Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 												   // are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+
+	CollectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Collection Sphere"));
+	CollectionSphere->AttachTo(RootComponent);
+	CollectionSphere->SetSphereRadius(200.0f);
 }
 
 // Called when the game starts or when spawned
@@ -53,17 +60,51 @@ void APlayerCharacter::BeginPlay()
 		return;
 	}
 
-	//GetMesh()->GetSocketWorldLocationAndRotation(FName("ItemSocket"), handSocketLocation, handSocketRotation);
-	item = GetWorld()->SpawnActor<AItem>(itemClass);
-	item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ItemSocket"));//AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),);
+
+	//item = GetWorld()->SpawnActor<AItem>(itemClass);
+	//item->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("ItemSocket"));//AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),);
 	//item->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld,true)); // USE TO DETACH
 }
 
 void APlayerCharacter::DropWeapon()
 {
-	item->EnableItemPhisics();
-	item->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	if (sword != nullptr)
+	{
+		sword->EnableItemPhisics();
+		sword->DetachFromActor(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+		sword = nullptr;
+	}
+}
 
+void APlayerCharacter::PickUpItem()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Pick up E pressed"));
+
+	TArray<AActor*> detectedActors;
+
+	CollectionSphere->GetOverlappingActors(detectedActors);
+
+	for (int32 i = 0; i < detectedActors.Num(); i++)
+	{
+		ASword* const testSword = Cast<ASword>(detectedActors[i]);
+
+		if (testSword && !testSword->IsPendingKill())
+		{
+			// Pick it up
+			UE_LOG(LogTemp, Warning, TEXT("item Detected"));
+			sword = testSword;
+			testSword->DisableItemPhisics();
+			testSword->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("RightHandSocket"));//AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),);
+		}
+
+		AShield* const testShield = Cast<AShield>(detectedActors[i]);
+
+		if (testShield && !testShield->IsPendingKill())
+		{
+			testShield->DisableItemPhisics();
+			testShield->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("LeftHandSocket"));//AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true),);
+		}
+	}
 }
 
 // Called every frame
@@ -86,6 +127,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 	PlayerInputComponent->BindAction("DropWeapon", IE_Pressed, this, &APlayerCharacter::DropWeapon);
+	PlayerInputComponent->BindAction("PickUpItem", IE_Pressed, this, &APlayerCharacter::PickUpItem);
+
+	
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.

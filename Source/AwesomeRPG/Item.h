@@ -26,6 +26,8 @@ public:
 	UStaticMeshComponent* itemMesh;
 
 	void EnableItemPhisics();
+
+	void DisableItemPhisics();
 	
 	
 };

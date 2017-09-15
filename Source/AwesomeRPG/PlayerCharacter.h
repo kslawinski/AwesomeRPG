@@ -1,14 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "Item.h"
+
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
+
+
 
 UCLASS()
 class AWESOMERPG_API APlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
 
 public:
 	// Sets default values for this character's properties
@@ -38,6 +41,11 @@ protected:
 
 	void DropWeapon();
 
+	void PickUpItem();
+
+	class AItem* item;
+	class ASword* sword;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -49,6 +57,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
+	/** Collection Sphere */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Setup", meta = (AllowPrivateAccess = "true"))
+		class USphereComponent* CollectionSphere;
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
@@ -56,7 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Setup")
 	TSubclassOf<AItem> itemClass;
 
-	AItem* item;
+
 
 	//FVector handSocketLocation;
 	//FRotator handSocketRotation;
@@ -74,5 +86,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	/** Returns CollectionSphere subobject **/
+	FORCEINLINE class USphereComponent* GetCollectionSphere() const { return CollectionSphere; }
 
 };
